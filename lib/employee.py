@@ -107,22 +107,15 @@ class Employee:
         CONN.commit()
 
     def delete(self):
-        """Delete the table row corresponding to the current Employee instance,
-        delete the dictionary entry, and reassign id attribute"""
-
-        sql = """
-            DELETE FROM employees
-            WHERE id = ?
-        """
-
+        """Delete the employee's database record and remove from cache"""
+        sql = "DELETE FROM employees WHERE id = ?"
         CURSOR.execute(sql, (self.id,))
-        CONN.commit()
+        CONN.commit()  # Ensure the deletion is committed
 
-        # Delete the dictionary entry using id as the key
-        del type(self).all[self.id]
+    if self.id in Employee.all:
+        del Employee.all[self.id]
 
-        # Set the id to None
-        self.id = None
+    self.id = None
 
     @classmethod
     def create(cls, name, job_title, department_id):
@@ -188,3 +181,20 @@ class Employee:
     def reviews(self):
         """Return list of reviews associated with current employee"""
         pass
+
+    def reviews(self):
+        from review import Review
+        sql = "SELECT * FROM reviews WHERE employee_id = ?"
+        CURSOR.execute(sql, (self.id,))
+        rows = CURSOR.fetchall()
+        return [Review.instance_from_db(row) for row in rows]
+    
+    def save(self):
+        if self.id is None:
+            sql = """
+                INSERT INTO employees (name, job_title, department_id)
+                VALUES (?, ?, ?)
+            """
+            CURSOR.execute(sql, (self.name, self.job_title, self.department_id))
+            CONN.commit()  
+            self.id = CURSOR.lastrowid
