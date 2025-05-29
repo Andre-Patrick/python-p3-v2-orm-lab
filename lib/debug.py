@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 from __init__ import CONN, CURSOR
 import random
 from department import Department
@@ -16,7 +14,6 @@ def reset_database():
     Employee.create_table()
     Review.create_table()
 
-    # Create seed data
     payroll = Department.create("Payroll", "Building A, 5th Floor")
     human_resources = Department.create(
         "Human Resources", "Building C, East Wing")
